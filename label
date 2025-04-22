@@ -1,0 +1,4 @@
+product_title = CELLCOM_CFG_BLN 1.1.0
+
+installfile cfg.xml
+installfile bin/LINUXintel/app_bln.so
