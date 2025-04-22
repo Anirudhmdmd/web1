@@ -2,8 +2,11 @@ pipeline {
     agent any
 
     environment {
-        PACKAGE_DIR = 'node_package'  // Directory to store the package
-        BLN_PACKAGE_NAME = 'bln_node_package.el'  // Name of the BLN node package (adjust as needed)
+        // Define directories for the node packages
+        NODE_PACKAGE_DIR = 'node_package'  // Directory for BLN node package
+        EL_PACKAGE_DIR = 'el_package'      // Directory for EL package
+        BLN_PACKAGE_NAME = 'bln_node_package.zip'  // BLN node package name
+        EL_PACKAGE_NAME = 'el_node_package.zip'    // EL package name (adjust as needed)
     }
 
     stages {
@@ -13,39 +16,41 @@ pipeline {
             }
         }
 
-        stage('Build Node Package') {
+        stage('Build Node Packages') {
             steps {
                 script {
-                    // Check if the label file exists
+                    // List contents of the current directory for debugging
+                    echo "Listing current directory contents..."
+                    bat 'dir'
+
+                    // Check if the label file exists for BLN
                     echo "Checking if label file exists in the current directory..."
                     if (fileExists("label")) {
-                        echo "Label file found, copying to ${PACKAGE_DIR}"
-                        bat "copy label ${PACKAGE_DIR}\\"
+                        echo "Label file found, copying to ${NODE_PACKAGE_DIR}"
+                        bat "if not exist ${NODE_PACKAGE_DIR} mkdir ${NODE_PACKAGE_DIR}"
+                        bat "copy label ${NODE_PACKAGE_DIR}\\"
                     } else {
                         error "Label file not found in the workspace!"
                     }
-                }
-            }
-        }
 
-        stage('Build BLN Node Package') {
-            steps {
-                script {
-                    echo "Building BLN Node Package..."
-
-                    // Assuming you have some steps to generate the BLN node package here
-                    // Replace the following example with the actual commands to create the package
-                    
-                    // Example: Assuming the BLN package is created using a script or tool
+                    // Assuming the EL package creation steps (e.g., generating dfd.xml & desc.asn)
+                    echo "Building EL Package..."
                     bat """
-                        echo Compiling BLN node package...
-                        # Replace this with the actual command to create the BLN node package
-                        # For example, if it's a custom script:
-                        build_bln_node_package.bat
+                        if not exist ${EL_PACKAGE_DIR} mkdir ${EL_PACKAGE_DIR}
+                        echo Creating EL node package...
+                        # Replace with actual steps to build the EL package
+                        # Example: el_build_script.bat (if you have such a script)
+                        # Assuming it's a custom script or tool to create the EL package
+                        build_el_package.bat
                     """
 
-                    // Verify if the BLN package is created
-                    if (!fileExists("${PACKAGE_DIR}\\${BLN_PACKAGE_NAME}")) {
+                    // Verify if the EL package is created
+                    if (!fileExists("${EL_PACKAGE_DIR}\\${EL_PACKAGE_NAME}")) {
+                        error "EL Node Package not found!"
+                    }
+
+                    // Example: After the EL package is created, you can also verify the BLN package
+                    if (!fileExists("${NODE_PACKAGE_DIR}\\${BLN_PACKAGE_NAME}")) {
                         error "BLN Node Package not found!"
                     }
                 }
@@ -54,7 +59,7 @@ pipeline {
 
         stage('Archive Package') {
             steps {
-                archiveArtifacts artifacts: "${PACKAGE_DIR}/**/*", allowEmptyArchive: true
+                archiveArtifacts artifacts: "${NODE_PACKAGE_DIR}/**/*, ${EL_PACKAGE_DIR}/**/*", allowEmptyArchive: true
             }
         }
 
