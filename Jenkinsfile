@@ -1,47 +1,42 @@
 pipeline {
     agent any
-
     environment {
-        // Define the workspace where the files will be stored
-        EL_HOME = 'C:\\Nokia\\Mediation\\elcompiler'
-        PATH = "${EL_HOME}\\bin;${env.PATH}"
+        WORKSPACE = "${env.WORKSPACE}"
     }
-
     stages {
-        stage('Checkout SCM') {
+        stage('Checkout') {
             steps {
-                // Checkout the code from Git repository
                 checkout scm
             }
         }
-
-        stage('Build BLN Node Package') {
+        stage('Compile BLN Node') {
             steps {
                 script {
-                    echo 'Building BLN Node Package...'
-                    // Run the batch script to compile the BLN EL Node
-                    bat 'build_el_package.bat'
+                    // Compile the C code using gcc
+                    bat 'gcc -o bln_node app_bln.c' // This will compile the C file to an executable named 'bln_node'
+                    
+                    // Create EL package structure (directories and move files)
+                    bat 'mkdir el_package\\bin' // Create bin folder
+                    bat 'mkdir el_package\\config' // Create config folder
+                    bat 'move bln_node el_package\\bin\\' // Move the compiled binary to the bin folder
+                    bat 'move cfg.xml el_package\\config\\' // Move cfg.xml to the config folder
+                    bat 'move dfd.xml el_package\\config\\' // Move dfd.xml to the config folder
+                    bat 'move desc.asn el_package\\config\\' // Move desc.asn to the config folder
+                    
+                    // Create a .el package (zip or other format)
+                    bat 'zip -r bln_node.el el_package\\' // Create a .zip file of the entire EL package
                 }
             }
         }
-
         stage('Archive Package') {
             steps {
-                // Archive the .el file as an artifact
-                archiveArtifacts artifacts: '**/*.el', fingerprint: true
-            }
-        }
-
-        stage('Clean Workspace') {
-            steps {
-                cleanWs() // Clean up the workspace after the build
+                archiveArtifacts artifacts: '**/*.el', fingerprint: true // Archive the .el package
             }
         }
     }
-
     post {
         always {
-            echo 'Cleaning up after pipeline execution...'
+            cleanWs() // Clean up workspace after the pipeline finishes
         }
     }
 }
