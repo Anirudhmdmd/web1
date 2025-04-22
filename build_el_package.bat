@@ -1,13 +1,23 @@
 @echo off
-echo Building BLN Node Package...
+echo Compiling BLN EL Node...
 
-rem Clean and create package dir
-if exist node_package rmdir /s /q node_package
-mkdir node_package
+REM Set path to elcc (EL compiler)
+set EL_HOME=C:\Nokia\Mediation\elcompiler
+set PATH=%EL_HOME%\bin;%PATH%
 
-rem Copy required files
-copy app_bln.c node_package\
-copy cfg.xml node_package\
-copy label node_package\
+REM Clean old output if any
+if exist bln.el del bln.el
 
-echo Build complete.
+REM Compile the node
+elcc -n bln -s app_bln.c
+
+REM Check for success
+if %ERRORLEVEL% NEQ 0 (
+    echo EL compilation failed!
+    exit /b 1
+)
+
+REM Copy result to Jenkins workspace root (optional)
+copy bln.el %WORKSPACE%
+
+echo Node build complete.
