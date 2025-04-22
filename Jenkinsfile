@@ -34,10 +34,10 @@ pipeline {
                     bat "mkdir -p ${PACKAGE_DIR}"
 
                     // Copy the required files to the package directory
-                    bat "cp ${LABEL_FILE} ${PACKAGE_DIR}/"
-                    bat "cp ${CFG_FILE} ${PACKAGE_DIR}/"
-                    bat "cp ${SO_FILE} ${PACKAGE_DIR}/"
-                    bat "cp ${BUILDINFO_FILE} ${PACKAGE_DIR}/"
+                    bat "copy ${LABEL_FILE} ${PACKAGE_DIR}\\"
+                    bat "copy ${CFG_FILE} ${PACKAGE_DIR}\\"
+                    bat "copy ${SO_FILE} ${PACKAGE_DIR}\\"
+                    bat "copy ${BUILDINFO_FILE} ${PACKAGE_DIR}\\"
 
                     // Create the tar.gz package
                     bat "tar -czvf ${PACKAGE_NAME}.tar.gz -C ${PACKAGE_DIR} ."
