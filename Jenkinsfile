@@ -30,8 +30,11 @@ pipeline {
         stage('Build Node Package') {
             steps {
                 script {
-                    // Create the package directory
-                    bat "mkdir -p ${PACKAGE_DIR}"
+                    // Create the package directory (Windows compatible)
+                    bat "if not exist ${PACKAGE_DIR} mkdir ${PACKAGE_DIR}"
+
+                    // Optional: List files for verification/debugging
+                    bat "dir"
 
                     // Copy the required files to the package directory
                     bat "copy ${LABEL_FILE} ${PACKAGE_DIR}\\"
