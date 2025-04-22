@@ -10,7 +10,4 @@ copy app_bln.c node_package\
 copy cfg.xml node_package\
 copy label node_package\
 
-rem Zip the files (optional if Jenkins will archive the folder directly)
-powershell -Command "Compress-Archive -Path node_package\* -DestinationPath bln_node_package.zip"
-
 echo Build complete.
