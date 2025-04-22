@@ -1,64 +1,42 @@
 pipeline {
-    agent any  // Can run on any available agent
-
-    environment {
-        PACKAGE_DIR = "node_package"   // Directory to hold the node files
-        LABEL_FILE = "label"           // Path to the label file
-        CFG_FILE = "cfg.xml"           // Path to the config file
-        SO_FILE = "app_bln.so"         // Path to the compiled shared object file
-        BUILDINFO_FILE = "app_bln.so.buildinfo"  // Path to the build info file
-        PACKAGE_NAME = "app_bln.el"    // Name of the final EL package
-        GIT_REPO = 'https://github.com/Anirudhmdmd/web1.git'  // Git repository URL
-        BRANCH = 'main'  // Branch to checkout (e.g., main, master, etc.)
-    }
-
+    agent any
     stages {
         stage('Checkout') {
             steps {
-                // Checkout the code from GitHub repository
-                git branch: "${BRANCH}", url: "${GIT_REPO}"
-            }
-        }
-
-        stage('Preparation') {
-            steps {
-                // Clean up any previous workspace files
-                deleteDir()
+                git url: 'https://github.com/Anirudhmdmd/web1.git', branch: 'main'
             }
         }
 
         stage('Build Node Package') {
             steps {
                 script {
-                    // Create the package directory (Windows compatible)
-                    bat "if not exist ${PACKAGE_DIR} mkdir ${PACKAGE_DIR}"
-
-                    // Optional: List files for verification/debugging
-                    bat "dir"
-
-                    // Copy the required files to the package directory
-                    bat "copy ${LABEL_FILE} ${PACKAGE_DIR}\\"
-                    bat "copy ${CFG_FILE} ${PACKAGE_DIR}\\"
-                    bat "copy ${SO_FILE} ${PACKAGE_DIR}\\"
-                    bat "copy ${BUILDINFO_FILE} ${PACKAGE_DIR}\\"
-
-                    // Create the tar.gz package
-                    bat "tar -czvf ${PACKAGE_NAME}.tar.gz -C ${PACKAGE_DIR} ."
+                    bat 'if not exist node_package mkdir node_package'
+                    bat 'dir > dir_contents.txt'
+                    bat '''
+                    if exist label (
+                        copy label node_package\\
+                    ) else (
+                        echo ERROR: label file not found!
+                        exit /b 1
+                    )
+                    '''
                 }
             }
         }
 
         stage('Archive Package') {
+            when {
+                expression {
+                    return fileExists('node_package')
+                }
+            }
             steps {
-                // Archive the generated package as a build artifact
-                archiveArtifacts artifacts: "${PACKAGE_NAME}.tar.gz", allowEmptyArchive: false
+                archiveArtifacts artifacts: 'node_package/**', fingerprint: true
             }
         }
     }
-
     post {
         always {
-            // Clean workspace after the job is done
             cleanWs()
         }
     }
