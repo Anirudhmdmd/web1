@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<configuration elversion="6.1">
+    <name>CELLCOM_CFG_BLN</name>
+  <version major="1" minor="1" defect="0" patch=""/>
+    <description>Common BLN node</description>
+    <type>
+        <collector>false</collector>
+        <intermediate>false</intermediate>
+        <decoder>false</decoder>
+        <businesslogic>true</businesslogic>
+        <blt>false</blt>
+        <encoder>false</encoder>
+        <distributor>false</distributor>
+        <standalone>false</standalone>
+        <interface>false</interface>
+    </type>
+    <nodebase>c_node</nodebase>
+    <attributes>
+        <application_commit>false</application_commit>
+        <schedulable>true</schedulable>
+        <realtime>false</realtime>
+    </attributes>
+    <scalability>
+        <none/>
+    </scalability>
+    <libraries>
+        <library exactversion="false" min_defect="0" min_major="3" min_minor="1" name="EL_LIB_LOOKUP"/>
+    </libraries>
+    <parameters>
+        <parameter name="DurationNoAggregation">
+            <value/>
+            <description>Duration in seconds when the record will bypass aggregation as a single record even if it's a partial.</description>
+            <check_regexp pattern=""/>
+            <value_type>
+                <numeric min_value="0"/>
+            </value_type>
+            <attributes>
+                <mandatory>true</mandatory>
+                <installation_specific>false</installation_specific>
+                <environment>false</environment>
+                <hidden>false</hidden>
+            </attributes>
+        </parameter>
+        <parameter name="DiscardLocalSGW">
+            <value/>
+            <description>Node parameter to discard local sGWRecords. Values can be 0 for not discarding, 1 for discarding them.</description>
+            <check_regexp pattern=""/>
+            <value_type>
+                <numeric min_value="0" max_value="1"/>
+            </value_type>
+            <attributes>
+                <mandatory>false</mandatory>
+                <installation_specific>false</installation_specific>
+                <environment>false</environment>
+                <hidden>false</hidden>
+            </attributes>
+        </parameter>
+        <parameter name="ProcessRG0Records">
+            <value/>
+            <description>Node parameter to enable or disable the processing of pGWRecord container with Rating Group 0. Values can be 0 for filtering them from further processing and 1 for processing them. The node parameter enables/disables the RG0 records for all switch types.</description>
+            <check_regexp pattern=""/>
+            <value_type>
+                <numeric min_value="0" max_value="1"/>
+            </value_type>
+            <attributes>
+                <mandatory>true</mandatory>
+                <installation_specific>false</installation_specific>
+                <environment>false</environment>
+                <hidden>false</hidden>
+            </attributes>
+        </parameter>
+		<parameter name="LocalIMSIPrefixes">
+            <value/>
+            <description>A comma separated list of local IMSI prefixes. For example 42502,42515.</description>
+            <check_regexp pattern=""/>
+            <value_type>
+                <any/>
+            </value_type>
+            <attributes>
+                <mandatory>true</mandatory>
+                <installation_specific>false</installation_specific>
+                <environment>false</environment>
+                <hidden>false</hidden>
+            </attributes>
+        </parameter>
+		<parameter name="AlarmThreshold">
+            <value/>
+            <description>A threshold for raising an alarm if the number of total rejected records during the day go over it. Only one alarm is raised during the day if threshold is reached and both the alarm and the number of rejected records is reset at scheduled time.</description>
+            <check_regexp pattern=""/>
+            <value_type>
+                <numeric min_value="0"/>
+            </value_type>
+            <attributes>
+                <mandatory>true</mandatory>
+                <installation_specific>false</installation_specific>
+                <environment>false</environment>
+                <hidden>false</hidden>
+            </attributes>
+        </parameter>
+		<parameter name="LookupServer">
+            <value>CellcomServer</value>
+            <description>Lookup Server instance name.</description>
+            <check_regexp pattern=""/>
+            <value_type>
+                <any/>
+            </value_type>
+            <attributes>
+                <mandatory>true</mandatory>
+                <installation_specific>false</installation_specific>
+                <environment>false</environment>
+                <hidden>false</hidden>
+            </attributes>
+        </parameter>
+    </parameters>
+    <messages/>
+    <docs/>
+    <files>
+        <file editable="false" name="bin/LINUXintel/app_bln.so" os="Linux" path="./">
+            <export>
+                <libpath>false</libpath>
+                <perl5lib>false</perl5lib>
+            </export>
+        </file>
+    </files>
+    <storages>        
+        <storage name="INV_PGW_IMSI">
+            <description>Storage for pGWRecords with invalid servedIMSI.</description>
+        </storage>
+		<storage name="INV_PGW_RECOPENTIME">
+            <description>Storage for pGWRecords with invalid recordOpeningTime</description>
+        </storage>
+		<storage name="INV_PGW_LISTSERVDATA">
+            <description>Storage for pGWRecords with missing listOfServiceData (no containers).</description>
+        </storage>
+		
+		
+		<storage name="INV_SGW_IMSI">
+            <description>Storage for sGWRecords with invalid servedIMSI.</description>
+        </storage>
+		<storage name="INV_SGW_RECOPENTIME">
+            <description>Storage for sGWRecords with invalid recordOpeningTime.</description>
+        </storage>
+		<storage name="INV_SGW_CHANGETIME">
+            <description>Storage for sGWRecords with invalid changeTime.</description>
+        </storage>
+		<storage name="INV_SGW_APN">
+            <description>Storage for sGWRecords with invalid apn.</description>
+        </storage>
+		<storage name="LOCAL_SGW">
+            <description>Storage for local sGWRecords.</description>
+        </storage>
+		
+		<storage name="INV_SGSN_SGSNADDRESS">
+            <description>Storage for sgsnPDPRecords with invalid sgsnAddress.s</description>
+        </storage>
+		<storage name="INV_SGSN_GGSNADDRESS">
+            <description>Storage for sgsnPDPRecords with invalid ggsnAddressUsed.</description>
+        </storage>
+		<storage name="INV_SGSN_IMSI">
+            <description>Storage for sgsnPDPRecords with invalid servedIMSI.</description>
+        </storage>
+		<storage name="INV_SGSN_RECOPENTIME">
+            <description>Storage for sgsnPDPRecords with invalid recordOpeningTime.</description>
+        </storage>
+		<storage name="INV_SGSN_CHANGETIME">
+            <description>Storage for sgsnPDPRecords with invalid changeTime.</description>
+        </storage>
+		<storage name="INV_SGSN_CHARGINGID">
+            <description>Storage for sgsnPDPRecords with invalid chargingID.</description>
+        </storage>	
+    </storages>
+    <links>
+        <link>SA_OUT_N1</link>
+		<link>SA_OUT_N2</link>
+		<link>SA_OUT_N3</link>
+		<link>SA_OUT_N4</link>
+		<link>SA_OUT_N5</link>
+		<link>SA_OUT_R</link>
+		<link>G_OUT_N</link>
+		<link>G_OUT_R</link>
+		<link>INVALID</link>
+    </links>
+    <auditkeys/>
+</configuration>
