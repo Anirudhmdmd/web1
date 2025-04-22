@@ -1,6 +1,8 @@
 pipeline {
     agent any
     environment {
+        // Add MinGW GCC path to system path so Jenkins can find gcc
+        PATH = "C:\\MinGW\\bin;${env.PATH}" // ⚠️ Replace with actual MinGW path
         WORKSPACE = "${env.WORKSPACE}"
     }
     stages {
@@ -12,31 +14,33 @@ pipeline {
         stage('Compile BLN Node') {
             steps {
                 script {
-                    // Compile the C code using gcc
-                    bat 'gcc -o bln_node app_bln.c' // This will compile the C file to an executable named 'bln_node'
+                    // Compile with header include if needed
+                    bat 'gcc -o bln_node app_bln.c -I"C:\\opt\\comptel\\eventlink\\sdk\\el-c-cxx-sdk\\include"' // ⚠️ Adjust path to nodebase.h
                     
-                    // Create EL package structure (directories and move files)
-                    bat 'mkdir el_package\\bin' // Create bin folder
-                    bat 'mkdir el_package\\config' // Create config folder
-                    bat 'move bln_node el_package\\bin\\' // Move the compiled binary to the bin folder
-                    bat 'move cfg.xml el_package\\config\\' // Move cfg.xml to the config folder
-                    bat 'move dfd.xml el_package\\config\\' // Move dfd.xml to the config folder
-                    bat 'move desc.asn el_package\\config\\' // Move desc.asn to the config folder
+                    // Create EL package structure
+                    bat 'mkdir el_package\\bin'
+                    bat 'mkdir el_package\\config'
                     
-                    // Create a .el package (zip or other format)
-                    bat 'zip -r bln_node.el el_package\\' // Create a .zip file of the entire EL package
+                    // Move files
+                    bat 'move bln_node el_package\\bin\\'
+                    bat 'move cfg.xml el_package\\config\\'
+                    bat 'move dfd.xml el_package\\config\\'
+                    bat 'move desc.asn el_package\\config\\'
+                    
+                    // Create zip package
+                    bat 'powershell -Command "Compress-Archive -Path el_package\\* -DestinationPath bln_node.el"'
                 }
             }
         }
         stage('Archive Package') {
             steps {
-                archiveArtifacts artifacts: '**/*.el', fingerprint: true // Archive the .el package
+                archiveArtifacts artifacts: '**/*.el', fingerprint: true
             }
         }
     }
     post {
         always {
-            cleanWs() // Clean up workspace after the pipeline finishes
+            cleanWs()
         }
     }
 }
