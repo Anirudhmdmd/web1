@@ -13,18 +13,20 @@ pipeline {
                     // Create node_package directory if it doesn't exist
                     bat 'if not exist node_package mkdir node_package'
 
-                    // List directory contents to dir_contents.txt
-                    bat 'dir > dir_contents.txt'
+                    // List all files (including hidden) to dir_contents.txt
+                    bat 'dir /a > dir_contents.txt'
 
                     // Print current directory path to current_dir.txt
                     bat 'echo Current directory: %cd% > current_dir.txt'
 
-                    // Copy the label file if it exists
+                    // Explicitly check for the existence of the 'label' file by echoing its path
                     bat '''
-                    if exist label (
+                    echo Checking if label file exists in the current directory...
+                    if exist "label" (
+                        echo label file found, copying to node_package
                         copy label node_package\\
                     ) else (
-                        echo ERROR: label file not found!
+                        echo ERROR: label file not found in %cd%!
                         exit /b 1
                     )
                     '''
