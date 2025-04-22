@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         PACKAGE_DIR = 'node_package'  // Directory to store the package
-        EL_PACKAGE_NAME = 'BLN_node_package.el'  // Name of the EL node package
+        BLN_PACKAGE_NAME = 'bln_node_package.zip'  // Name of the BLN node package (adjust as needed)
     }
 
     stages {
@@ -13,27 +13,33 @@ pipeline {
             }
         }
 
-        stage('Build EL Node Package') {
+        stage('Build Node Package') {
             steps {
                 script {
-                    echo "Creating EL node package..."
-
-                    // List contents of the workspace directory for debugging
+                    // List contents of the current directory for debugging
                     echo "Listing current directory contents..."
                     bat 'dir'
 
-                    // Check if the build_el_package.bat exists and is callable
-                    echo "Checking if build_el_package.bat exists..."
-                    bat "if exist build_el_package.bat (echo build_el_package.bat found) else (echo build_el_package.bat not found)"
-
-                    // Assuming build_el_package.bat exists in the current directory or a subdirectory
-                    echo "Running EL package build script..."
-                    bat "call build_el_package.bat"  // Adjust the path if it's in a subfolder
-
-                    // Verify if the EL package is created
-                    if (!fileExists("${PACKAGE_DIR}\\${EL_PACKAGE_NAME}")) {
-                        error "EL Node Package not found!"
+                    // Check if the label file exists
+                    echo "Checking if label file exists in the current directory..."
+                    if (fileExists("label")) {
+                        echo "Label file found, copying to ${PACKAGE_DIR}"
+                        // Ensure target directory exists before copying
+                        bat "if not exist ${PACKAGE_DIR} mkdir ${PACKAGE_DIR}"
+                        bat "copy label ${PACKAGE_DIR}\\"
+                    } else {
+                        error "Label file not found in the workspace!"
                     }
+                }
+            }
+        }
+
+        stage('Run Build Script with WSL Bash') {
+            steps {
+                script {
+                    echo "Running build.sh script using WSL Bash..."
+                    // Run the build.sh script using WSL bash.exe (WSL should be installed)
+                    bat "\"C:\\Windows\\System32\\bash.exe\" -c \"./build.sh\""
                 }
             }
         }
